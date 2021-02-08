@@ -1,4 +1,6 @@
-import { BaseEntity, Column, Entity, PrimaryGeneratedColumn, Unique } from 'typeorm';
+import { Post } from './../posts/post.entity';
+import { Address } from './address.entity';
+import { BaseEntity, Column, Entity, Index, JoinColumn, OneToMany, OneToOne, PrimaryGeneratedColumn, Unique } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { Exclude } from 'class-transformer';
 
@@ -9,6 +11,7 @@ export class User extends BaseEntity {
     id?: number;
 
     @Column()
+    @Index()
     email: string;
 
     @Column()
@@ -21,6 +24,13 @@ export class User extends BaseEntity {
     @Column()
     @Exclude()
     salt: string;
+
+    @OneToOne(type => Address, { cascade: true })
+    @JoinColumn()
+    address: Address;
+
+    @OneToMany(type => Post, (post:Post) => post.author)
+    posts: Post[];
 
     async validatePassword(password: string):Promise<boolean> {
         const hashedPassword = await bcrypt.hash(password, this.salt);

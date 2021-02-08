@@ -1,11 +1,14 @@
+import { User } from 'src/users/user.entity';
 import { UpdatePostDto } from './dto/update-post.dto';
 import { CreatePostDto } from './dto/create-post.dto';
 import { PostsService } from './posts.service';
-import { Body, Controller, Delete, Get, HttpCode, InternalServerErrorException, Param, ParseIntPipe, Post, Put, UseGuards } from '@nestjs/common';
+import { Body, ClassSerializerInterceptor, Controller, Delete, Get, HttpCode, InternalServerErrorException, Param, ParseIntPipe, Post, Put, UseGuards, UseInterceptors } from '@nestjs/common';
 import {JwtAuthGuard} from 'src/auth/jwt-auth.guard';
+import { GetUser } from 'src/auth/get-user.decorator';
 
 @Controller('posts')
 @UseGuards(JwtAuthGuard)
+@UseInterceptors(ClassSerializerInterceptor)
 export class PostsController {
 
     constructor(private readonly postsService: PostsService) {}
@@ -16,8 +19,8 @@ export class PostsController {
      * @return user posts
      */
     @Get('')
-    async getPosts() {
-        return await this.postsService.getPosts();
+    async getPosts(@GetUser() user: User) {
+        return await this.postsService.getPosts(user);
     }
 
     /**
@@ -27,8 +30,8 @@ export class PostsController {
      * @return user post
      */
     @Get('/:id')
-    getPost(@Param('id', ParseIntPipe) id: number) {
-        return this.postsService.getPostById(id);
+    getPost(@Param('id', ParseIntPipe) id: number, @GetUser() user: User) {
+        return this.postsService.getPostById(id, user);
     }
 
     /**
@@ -38,8 +41,8 @@ export class PostsController {
      * @return new post
      */
     @Post('')
-    createPost(@Body() createPostDto: CreatePostDto) {
-        return this.postsService.createPost(createPostDto);
+    createPost(@Body() createPostDto: CreatePostDto, @GetUser() user: User) {
+        return this.postsService.createPost(createPostDto, user);
     }
 
     /**
@@ -50,8 +53,8 @@ export class PostsController {
      * @return updated post
      */
     @Put('/:id')
-    updatePost(@Body() updatePostDto: UpdatePostDto, @Param('id', ParseIntPipe) id: number) {
-        return this.postsService.updatePost(id, updatePostDto);
+    updatePost(@Body() updatePostDto: UpdatePostDto, @Param('id', ParseIntPipe) id: number, @GetUser() user: User) {
+        return this.postsService.updatePost(id, updatePostDto, user);
     }
 
     /**
@@ -62,7 +65,7 @@ export class PostsController {
      */
     @Delete('/:id')
     @HttpCode(204)
-    deletePost(@Param('id', ParseIntPipe) id: number) {
-        this.postsService.deletPost(id);
+    async deletePost(@Param('id', ParseIntPipe) id: number, @GetUser() user: User) {
+        await this.postsService.deletPost(id, user);
     }
 }
