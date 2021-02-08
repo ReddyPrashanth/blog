@@ -1,9 +1,11 @@
 import { UpdatePostDto } from './dto/update-post.dto';
 import { CreatePostDto } from './dto/create-post.dto';
 import { PostsService } from './posts.service';
-import { Body, Controller, Delete, Get, HttpCode, Param, Post, Put } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, InternalServerErrorException, Param, ParseIntPipe, Post, Put, UseGuards } from '@nestjs/common';
+import {JwtAuthGuard} from 'src/auth/jwt-auth.guard';
 
 @Controller('posts')
+@UseGuards(JwtAuthGuard)
 export class PostsController {
 
     constructor(private readonly postsService: PostsService) {}
@@ -25,8 +27,8 @@ export class PostsController {
      * @return user post
      */
     @Get('/:id')
-    getPost(@Param('id') id: string) {
-        return this.postsService.getPostById(Number(id));
+    getPost(@Param('id', ParseIntPipe) id: number) {
+        return this.postsService.getPostById(id);
     }
 
     /**
@@ -48,8 +50,8 @@ export class PostsController {
      * @return updated post
      */
     @Put('/:id')
-    updatePost(@Body() updatePostDto: UpdatePostDto, @Param('id') id: number) {
-        return this.postsService.updatePost(Number(id), updatePostDto);
+    updatePost(@Body() updatePostDto: UpdatePostDto, @Param('id', ParseIntPipe) id: number) {
+        return this.postsService.updatePost(id, updatePostDto);
     }
 
     /**
@@ -60,7 +62,7 @@ export class PostsController {
      */
     @Delete('/:id')
     @HttpCode(204)
-    deletePost(@Param('id') id: number) {
-        this.postsService.deletPost(Number(id));
+    deletePost(@Param('id', ParseIntPipe) id: number) {
+        this.postsService.deletPost(id);
     }
 }
