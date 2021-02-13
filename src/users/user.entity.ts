@@ -25,7 +25,7 @@ export class User extends BaseEntity {
     @Exclude()
     salt: string;
 
-    @OneToOne(type => Address, { cascade: true })
+    @OneToOne(type => Address, { eager: true, cascade: true })
     @JoinColumn()
     address: Address;
 

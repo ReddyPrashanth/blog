@@ -20,7 +20,7 @@ export class PostsService {
     }
 
     async getPostById(id:number, user:User) {
-        const post = await this.postRepository.findOne({where: {id, userId: user.id}});
+        const post = await this.postRepository.findOne({where: {id, authorId: user.id}});
         if(post) {
             return post;
         }

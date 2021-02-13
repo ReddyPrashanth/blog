@@ -17,5 +17,6 @@ export class Post extends BaseEntity{
     authorId: number;
 
     @ManyToOne(type => User, (author: User) => author.posts, {eager: false})
+    @Exclude()
     author: User;
 }
